@@ -18,6 +18,7 @@
 //  limitations under the License.
 //
 
+#if os(iOS) || os(tvOS) || os(visionOS)
 import Foundation
 import UIKit
 
@@ -227,3 +228,4 @@ public final class PasteboardLibrary: NativeLibrary {
     return .void
   }
 }
+#endif

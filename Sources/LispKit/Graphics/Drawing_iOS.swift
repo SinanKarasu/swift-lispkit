@@ -18,6 +18,7 @@
 //  limitations under the License.
 //
 
+#if os(iOS) || os(tvOS) || os(visionOS)
 import CoreGraphics
 import Foundation
 import UIKit
@@ -724,3 +725,4 @@ extension CGPoint {
     return sqrt(pow((point.x - x), 2) + pow((point.y - y), 2))
   }
 }
+#endif

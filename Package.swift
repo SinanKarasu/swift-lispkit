@@ -81,11 +81,7 @@ let package = Package(
             ],
             exclude: [
               "Info.plist",
-              "Resources",
-              "Graphics/Drawing_iOS.swift",
-              "Graphics/Transformation_iOS.swift",
-              "Primitives/DrawingLibrary_iOS.swift",
-              "Primitives/PasteboardLibrary_iOS.swift"
+              "Resources"
             ]),
     .target(name: "LispKitTools",
             dependencies: [

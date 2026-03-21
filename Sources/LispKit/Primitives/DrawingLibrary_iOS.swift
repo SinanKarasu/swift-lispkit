@@ -18,6 +18,7 @@
 //  limitations under the License.
 //
 
+#if os(iOS) || os(tvOS) || os(visionOS)
 import Foundation
 import MarkdownKit
 import UIKit
@@ -2638,3 +2639,4 @@ extension UIFont {
     return fontDescriptor.object(forKey: .traits) as? [UIFontDescriptor.TraitKey: Any] ?? [:]
   }
 }
+#endif

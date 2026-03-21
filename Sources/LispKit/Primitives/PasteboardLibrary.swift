@@ -18,6 +18,7 @@
 //  limitations under the License.
 //
 
+#if os(macOS)
 import Foundation
 import AppKit
 
@@ -285,3 +286,4 @@ public final class PasteboardLibrary: NativeLibrary {
     return .void
   }
 }
+#endif

@@ -18,6 +18,7 @@
 //  limitations under the License.
 //
 
+#if os(iOS) || os(tvOS) || os(visionOS)
 import Foundation
 import CoreGraphics
 import UIKit
@@ -88,3 +89,4 @@ public final class Transformation: NativeObject {
     self.affineTransform = self.affineTransform.inverted()
   }
 }
+#endif

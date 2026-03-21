@@ -518,9 +518,13 @@ public final class PDFLibrary: NativeLibrary {
           case "burn-in-annotations":
             res[.burnInAnnotationsOption] = value.isTrue
           case "optimize-for-screen":
-            res[.optimizeImagesForScreenOption] = value.isTrue
+            if #available(iOS 16.4, macOS 13.3, visionOS 1.0, *) {
+              res[.optimizeImagesForScreenOption] = value.isTrue
+            }
           case "save-images-as-jpeg":
-            res[.saveImagesAsJPEGOption] = value.isTrue
+            if #available(iOS 16.4, macOS 13.3, visionOS 1.0, *) {
+              res[.saveImagesAsJPEGOption] = value.isTrue
+            }
           case "save-text-from-ocr":
             res[.saveTextFromOCROption] = value.isTrue
           default:
@@ -2720,7 +2724,14 @@ public final class LispKitPDFDocument: PDFDocument {
       res[.burnInAnnotationsOption] = burnInAnnotations
     }
     if let optimizeImagesForScreen {
-      res[.optimizeImagesForScreenOption] = optimizeImagesForScreen
+      if #available(iOS 16.4, macOS 13.3, visionOS 1.0, *) {
+        res[.optimizeImagesForScreenOption] = optimizeImagesForScreen
+      }
+    }
+    if let saveImagesAsJPEG {
+      if #available(iOS 16.4, macOS 13.3, visionOS 1.0, *) {
+        res[.saveImagesAsJPEGOption] = saveImagesAsJPEG
+      }
     }
     if let saveTextFromOCR {
       res[.saveTextFromOCROption] = saveTextFromOCR

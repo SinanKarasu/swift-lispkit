@@ -20,6 +20,8 @@
 
 import Foundation
 
+#if os(macOS)
+
 ///
 /// System Call library
 ///
@@ -156,3 +158,4 @@ public final class SystemCallLibrary: NativeLibrary {
     return .fixnum(Int64(proc.isRunning ? -1 : proc.terminationStatus))
   }
 }
+#endif

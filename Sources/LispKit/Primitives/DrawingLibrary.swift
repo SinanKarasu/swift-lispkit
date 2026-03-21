@@ -18,6 +18,7 @@
 //  limitations under the License.
 //
 
+#if os(macOS)
 import Foundation
 import Cocoa
 import AppKit
@@ -2619,3 +2620,4 @@ public final class NativeImage: AnyNativeObject<NSImage> {
             .makeNumber(self.value.size.height)]
   }
 }
+#endif

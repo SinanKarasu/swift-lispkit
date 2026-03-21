@@ -18,6 +18,7 @@
 //  limitations under the License.
 //
 
+#if os(macOS)
 import CoreGraphics
 import Cocoa
 import AppKit
@@ -585,3 +586,4 @@ public enum ObjectLocation {
   case position(NSPoint)
   case boundingBox(NSRect)
 }
+#endif
