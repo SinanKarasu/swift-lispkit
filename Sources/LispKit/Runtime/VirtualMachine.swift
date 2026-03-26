@@ -634,7 +634,139 @@ public final class VirtualMachine: ManagedObject {
   }
   
   public func getCallTraceInfo(current: Procedure? = nil, cap: Int? = nil) -> [String]? {
-    return self.getCallTrace(current: current, cap: cap)?.map { expr in expr.description }
+    return self.getCallTrace(current: current, cap: cap)?.map(Self.describeCallTraceExpr)
+  }
+  
+  // Format call traces defensively so uncaught errors don't spend unbounded
+  // time recursively stringifying large or cyclic argument graphs.
+  private static func describeCallTraceExpr(_ expr: Expr) -> String {
+    func atom(_ expr: Expr) -> String {
+      switch expr {
+        case .undef:
+          return "#?"
+        case .void:
+          return "#<void>"
+        case .eof:
+          return "#<eof>"
+        case .null:
+          return "()"
+        case .true:
+          return "#t"
+        case .false:
+          return "#f"
+        case .uninit(let sym):
+          return "#<? \(sym.rawIdentifier.truncated(limit: 48))>"
+        case .symbol(let sym):
+          return sym.rawIdentifier.truncated(limit: 64)
+        case .fixnum(let val):
+          return String(val)
+        case .bignum(_):
+          return "#<bignum>"
+        case .rational(_, _):
+          return "#<rational>"
+        case .flonum(let val):
+          return String(val)
+        case .complex(_):
+          return "#<complex>"
+        case .char(let ch):
+          if let scalar = UnicodeScalar(ch), ch >= 33, ch != 127, ch <= 0xd7ff {
+            return "#\\\(Character(scalar))"
+          } else {
+            return "#\\x\(String(ch, radix: 16))"
+          }
+        case .string(let str):
+          return "\"\(Expr.escapeStr(str as String).truncated(limit: 48, pos: .middle))\""
+        case .bytes(let bytes):
+          return "#u8[\(bytes.value.count)]"
+        case .pair(_, _):
+          return "(...)"
+        case .box:
+          return "#<box>"
+        case .mpair:
+          return "#<pair>"
+        case .array(let array):
+          return "#<array \(array.exprs.count)>"
+        case .vector(let vector):
+          return vector.isGrowableVector ? "#g[\(vector.exprs.count)]" : "#[\(vector.exprs.count)]"
+        case .record(let record):
+          if case .record(let type) = record.kind,
+             type.exprs.indices.contains(Collection.RecordType.typeTag.rawValue),
+             case .symbol(let sym) = type.exprs[Collection.RecordType.typeTag.rawValue] {
+            return "#<record \(sym.rawIdentifier.truncated(limit: 48))>"
+          } else {
+            return "#<record>"
+          }
+        case .table(let table):
+          return "#<hashtable \(table.count)>"
+        case .promise(let promise):
+          return "#<\(promise.kind)>"
+        case .values(_):
+          return "#<values>"
+        case .procedure(let proc):
+          return "#<procedure \(proc.embeddedName.truncated(limit: 64))>"
+        case .special(let special):
+          return "#<special \(special.name.truncated(limit: 64))>"
+        case .env(let environment):
+          switch environment.kind {
+            case .library:
+              return "#<env library>"
+            case .program(let filename):
+              return "#<env \(filename.truncated(limit: 48, pos: .middle))>"
+            case .repl:
+              return "#<env interaction>"
+            case .custom:
+              return "#<env>"
+          }
+        case .port(let port):
+          return "#<\(port.typeDescription) \(port.identDescription.truncated(limit: 48, pos: .middle))>"
+        case .object(let obj):
+          return "#<\(obj.tagString.truncated(limit: 64, pos: .middle))>"
+        case .tagged(_, _):
+          return "#<tag>"
+        case .error(let error):
+          return "#<\(error.inlineDescription.truncated(limit: 96, pos: .middle))>"
+        case .syntax(_, let wrapped):
+          return atom(wrapped)
+      }
+    }
+    
+    func describe(_ expr: Expr, depth: Int) -> String {
+      guard depth > 0 else {
+        return atom(expr)
+      }
+      switch expr {
+        case .pair:
+          var items: [String] = []
+          var current = expr
+          var remaining = 4
+          while remaining > 0, case .pair(let head, let tail) = current {
+            items.append(describe(head, depth: depth - 1))
+            current = tail
+            remaining -= 1
+          }
+          let suffix: String
+          if case .pair = current {
+            suffix = " ..."
+          } else if current.isNull {
+            suffix = ""
+          } else {
+            suffix = " . \(atom(current))"
+          }
+          return "(\(items.joined(separator: " "))\(suffix))"
+        case .rational(let numerator, let denominator):
+          return "\(atom(numerator))/\(atom(denominator))"
+        case .values(let list):
+          return "#<values \(describe(list, depth: depth - 1))>"
+        case .tagged(let tag, let wrapped):
+          return "#<tag \(atom(tag)): \(describe(wrapped, depth: depth - 1))>"
+        case .syntax(_, let wrapped):
+          return describe(wrapped, depth: depth)
+        default:
+          return atom(expr)
+      }
+    }
+    
+    return describe(expr, depth: 2).truncated(limit: 160, pos: .middle)
   }
   
   @inline(__always) private func printCallTrace(_ n: Int, tailCall: Bool = false) -> Procedure? {
