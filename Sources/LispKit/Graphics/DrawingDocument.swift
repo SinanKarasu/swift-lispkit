@@ -20,7 +20,7 @@
 
 import Foundation
 import CoreGraphics
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
@@ -155,7 +155,7 @@ public final class DrawingDocument {
                                        length: MemoryLayout.size(ofValue: mediaBox))
       ]
       // Create a graphics context for drawing into the PDF page
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       UIGraphicsPushContext(cgc)
       defer {
         UIGraphicsPopContext()

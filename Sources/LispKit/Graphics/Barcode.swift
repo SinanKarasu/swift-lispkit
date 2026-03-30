@@ -7,7 +7,9 @@
 //
 
 import Foundation
-#if os(iOS) || os(watchOS) || os(tvOS)
+import CoreGraphics
+import CoreImage
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
@@ -57,7 +59,7 @@ struct Barcode {
     return nil
   }
   
-  #if os(iOS) || os(watchOS) || os(tvOS)
+  #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
   private static func transform(image: CIImage,
                                 with transform: CGAffineTransform,
                                 scale: CGFloat) -> NativeImage? {

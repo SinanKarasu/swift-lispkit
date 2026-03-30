@@ -23,7 +23,11 @@ import Foundation
 public final class LispKitContext: Context {
   
   /// Bundle of the LispKit module
-  public static let bundle = Bundle(identifier: "net.objecthub.LispKit")
+  #if SWIFT_PACKAGE
+    public static let bundle: Bundle? = Bundle.module
+  #else
+    public static let bundle = Bundle(identifier: "net.objecthub.LispKit")
+  #endif
   
   /// Name of the LispKit implementation
   public static let implementationName =
@@ -34,7 +38,11 @@ public final class LispKitContext: Context {
     LispKitContext.bundle?.infoDictionary?["CFBundleShortVersionString"] as? String
   
   /// LispKit root directory in the bundle
-  public static let rootDirectory = "Root/LispKit"
+  #if SWIFT_PACKAGE
+    public static let rootDirectory = "."
+  #else
+    public static let rootDirectory = "Root/LispKit"
+  #endif
   
   /// Path to default prelude file. Set it to the prelude provided by the bundle, if this exists,
   /// or fall back to the LispKit directory contained in the Documents folder.

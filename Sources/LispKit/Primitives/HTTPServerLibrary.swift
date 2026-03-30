@@ -21,7 +21,7 @@
 import Foundation
 import NanoHTTP
 import DynamicJSON
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(macOS)
 import Cocoa
@@ -800,7 +800,7 @@ public final class HTTPServerLibrary: NativeLibrary {
     return .void
   }
   
-  #if os(iOS) || os(watchOS) || os(tvOS)
+  #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
   private func image(_ image: NativeImage, to mimeType: String) -> Data? {
     var type: BitmapImageFileType
     switch mimeType {

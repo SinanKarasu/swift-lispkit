@@ -20,7 +20,7 @@
 
 import Foundation
 import CoreGraphics
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
@@ -235,7 +235,7 @@ public final class Shape: NativeObject {
     }
     if self.flipped {
       let bounds = bezierPath.bounds
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       bezierPath.apply(CGAffineTransform(translationX: 0.0, y: -bounds.origin.y))
       bezierPath.apply(CGAffineTransform(scaleX: 1.0, y: -1.0))
       bezierPath.apply(CGAffineTransform(translationX: 0.0,
@@ -310,7 +310,7 @@ public enum ShapePrototype {
       case .line(let start, let end):
         let bezierPath = BezierPath()
         bezierPath.move(to: start)
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         bezierPath.addLine(to: end)
         #elseif os(macOS)
         bezierPath.line(to: end)
@@ -319,7 +319,7 @@ public enum ShapePrototype {
       case .rect(let rect):
         return BezierPath(rect: rect)
       case .roundedRect(let rect, let xrad, let yrad):
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         return BezierPath(roundedRect: rect,
                           byRoundingCorners: .allCorners,
                           cornerRadii: CGSize(width: CGFloat(xrad), height: CGFloat(yrad)))
@@ -332,7 +332,7 @@ public enum ShapePrototype {
         return bezierPath
       case .arc(let center, let radius, let start, let end, let clockwise):
         let bezierPath = BezierPath()
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         bezierPath.addArc(withCenter: center,
                           radius: CGFloat(radius),
                           startAngle: CGFloat(start),
@@ -349,7 +349,7 @@ public enum ShapePrototype {
       case .glyphs(let str, let rect, let font, let flipped):
         let bezierPath = BezierPath()
         bezierPath.move(to: rect.origin)
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         // This does not exactly do what's implemented for macOS as it ignores the width and
         // height of `rect`.
         let textPath = CGMutablePath()
@@ -394,7 +394,7 @@ public enum ShapePrototype {
         bezierPath.append(withCGGlyphs: &glyphBuffer, count: glyphCount, in: font)
         #endif
         var bounds = bezierPath.bounds
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         bezierPath.apply(CGAffineTransform(translationX: rect.origin.x - bounds.origin.x,
                                            y: rect.origin.y - bounds.origin.y))
         #elseif os(macOS)
@@ -403,7 +403,7 @@ public enum ShapePrototype {
         #endif
         if flipped {
           bounds = bezierPath.bounds
-          #if os(iOS) || os(watchOS) || os(tvOS)
+          #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
           bezierPath.apply(CGAffineTransform(translationX: 0.0, y: -bounds.origin.y))
           bezierPath.apply(CGAffineTransform(scaleX: 1.0, y: -1.0))
           bezierPath.apply(CGAffineTransform(translationX: 0.0, y: bounds.origin.y + bounds.height))
@@ -422,7 +422,7 @@ public enum ShapePrototype {
       case .shape(let shape):
         return shape.compileNew()
       case .transformed(let shape, let transform):
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         let bezierPath = shape.compile().copy() as! BezierPath
         bezierPath.apply(transform.affineTransform)
         return bezierPath
@@ -432,7 +432,7 @@ public enum ShapePrototype {
       case .flipped(let shape, let box, let vertical, let horizontal):
         var bezierPath = shape.compile()
         let bounds = box ?? bezierPath.bounds
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         bezierPath = bezierPath.copy() as! BezierPath
         bezierPath.apply(CGAffineTransform(translationX: -bounds.origin.x,
                                            y: -bounds.origin.y))
@@ -499,7 +499,7 @@ public enum InterpolationMethod {
       mx = ((closed || i < nCurves - 1 ? nextPt.x : curPt.x) - prevPt.x) * 0.5
       my = ((closed || i < nCurves - 1 ? nextPt.y : curPt.y) - prevPt.y) * 0.5
       let ctrlPt2 = CGPoint(x: curPt.x - mx * alpha, y: curPt.y - my * alpha)
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       path.addCurve(to: curPt, controlPoint1: ctrlPt1, controlPoint2: ctrlPt2)
       #elseif os(macOS)
       path.curve(to: curPt, controlPoint1: ctrlPt1, controlPoint2: ctrlPt2)
@@ -552,7 +552,7 @@ public enum InterpolationMethod {
         b2 = pointMult(b2, 1.0 / (3.0 * pow(d3, alpha) * (pow(d3, alpha) + pow(d2, alpha))))
       }
       if let path = path {
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         path.addCurve(to: p2, controlPoint1: b1, controlPoint2: b2)
         #elseif os(macOS)
         path.curve(to: p2, controlPoint1: b1, controlPoint2: b2)
@@ -560,7 +560,7 @@ public enum InterpolationMethod {
       } else {
         path = BezierPath()
         path?.move(to: p1)
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         path?.addCurve(to: p2, controlPoint1: b1, controlPoint2: b2)
         #elseif os(macOS)
         path?.curve(to: p2, controlPoint1: b1, controlPoint2: b2)
@@ -619,7 +619,7 @@ public enum ShapeConstructor {
   case include(Shape)
   
   func compile(into path: BezierPath) {
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     switch self {
       case .move(let point):
         path.move(to: point)
@@ -662,7 +662,7 @@ public enum ShapeConstructor {
   }
 }
 
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 public typealias BezierPath = UIBezierPath
 public typealias Font = UIFont
 #elseif os(macOS)

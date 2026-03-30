@@ -20,7 +20,7 @@
 
 import Foundation
 import CoreImage
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
@@ -404,7 +404,7 @@ public final class ImageLibrary: NativeLibrary {
     guard case .object(let obj) = expr, let nc = obj as? Color else {
       throw RuntimeError.type(expr, expected: [Color.type])
     }
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     return .object(AbstractImage(ciImage: CIImage(color: CIColor(color: nc.nsColor))))
     #elseif os(macOS)
     return .object(AbstractImage(ciImage:
@@ -427,7 +427,7 @@ public final class ImageLibrary: NativeLibrary {
     guard let cgImage = aimg.cgImage(using: self.ciContext, flipped: flip?.isTrue ?? false) else {
       return .false
     }
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     let updateImage = UIImage(cgImage: cgImage, scale: scale, orientation: .up)
     #elseif os(macOS)
     let rep = NSBitmapImageRep(cgImage: cgImage)
@@ -543,7 +543,7 @@ public final class ImageLibrary: NativeLibrary {
         if let nd = obj as? NativeDateTime, let date = nd.value.date {
           return date as NSDate
         } else if let nc = obj as? Color {
-          #if os(iOS) || os(watchOS) || os(tvOS)
+          #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
           return CIColor(color: nc.nsColor)
           #elseif os(macOS)
           return CIColor(color: nc.nsColor) ??
@@ -555,7 +555,7 @@ public final class ImageLibrary: NativeLibrary {
           return vector.ciVector
         } else if let transform = obj as? Transformation {
           let t = transform.affineTransform
-          #if os(iOS) || os(watchOS) || os(tvOS)
+          #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
           return NSValue(cgAffineTransform: t)
           #elseif os(macOS)
           return t as NSAffineTransform
@@ -619,7 +619,7 @@ public final class ImageLibrary: NativeLibrary {
     } else if let o = obj as? AnyClass, o === self.deviceRgbColorSpace {
       return .symbol(self.rgbColorSpace)
     } else {
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       if let val = obj as? NSValue, String(cString: val.objCType).hasPrefix("{CGAffineTransform") {
         return .object(Transformation(val.cgAffineTransformValue))
       }
@@ -663,7 +663,7 @@ public final class ImageLibrary: NativeLibrary {
         let path = self.context.fileHandler.path(
                      try from.asPath(),
                      relativeTo: self.context.evaluator.currentDirectoryPath)
-        #if os(iOS) || os(watchOS) || os(tvOS)
+        #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
         guard let cgImage = UIImage(contentsOfFile: path)?.cgImage else {
           throw RuntimeError.eval(.cannotLoadImage, from)
         }
@@ -686,7 +686,7 @@ public final class ImageLibrary: NativeLibrary {
                   let image = imageFilter.ciFilter.outputImage {
           return AbstractImage(ciImage: image)
         } else if let nc = obj as? Color {
-          #if os(iOS) || os(watchOS) || os(tvOS)
+          #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
           return AbstractImage(ciImage: CIImage(color: CIColor(color: nc.nsColor)))
           #elseif os(macOS)
           return AbstractImage(ciImage:
@@ -1210,7 +1210,7 @@ public struct AbstractImage: CustomExpr {
   }
   
   public init?(image: NativeImage, flipped: Bool = false) {
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     guard let cgImage = image.value.cgImage else {
       return nil
     }

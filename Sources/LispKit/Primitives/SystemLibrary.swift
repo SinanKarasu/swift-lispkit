@@ -22,7 +22,7 @@ import Foundation
 import CLFormat
 import NanoHTTP
 
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(macOS)
 import Cocoa
@@ -533,7 +533,7 @@ public final class SystemLibrary: NativeLibrary {
     let path = self.context.fileHandler.path(try expr.asPath(),
                                              relativeTo: self.context.evaluator.currentDirectoryPath)
     if let app = withApp {
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       return .false
       #elseif os(macOS)
       guard let appUrl = self.appUrl(for: try app.asPath()) else {
@@ -556,7 +556,7 @@ public final class SystemLibrary: NativeLibrary {
       }
       #endif
     } else {
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       if path.starts(with: "/var/"),  // This is a hack! If I just would know how to avoid it...
          let url = URL(string: "shareddocuments:///private\(path)"),
          UIApplication.shared.canOpenURL(url) {
@@ -957,6 +957,8 @@ public final class SystemLibrary: NativeLibrary {
       return .makeString("macOS")
     #elseif os(iOS)
       return .makeString(UIDevice.current.userInterfaceIdiom == .pad ? "iPadOS" : "iOS")
+    #elseif os(visionOS)
+      return .makeString("visionOS")
     #elseif os(Linux)
       return .makeString("Linux")
     #endif
@@ -1007,7 +1009,7 @@ public final class SystemLibrary: NativeLibrary {
   }
   
   private func openUrl(_ expr: Expr) throws -> Expr {
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     DispatchQueue.main.async {
       do {
         UIApplication.shared.open(try expr.asURL())

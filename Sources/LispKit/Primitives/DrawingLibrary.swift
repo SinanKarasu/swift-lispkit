@@ -1842,7 +1842,7 @@ public final class DrawingLibrary: NativeLibrary {
     guard case .object(let obj) = expr, let color = obj as? Color else {
       throw RuntimeError.type(expr, expected: [Color.type])
     }
-    return .makeString(color.nsColor.hexString)
+    return .makeString(color.hexString)
   }
   
   private func colorRed(_ expr: Expr) throws -> Expr {

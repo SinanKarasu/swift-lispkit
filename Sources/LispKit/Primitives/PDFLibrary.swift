@@ -1005,7 +1005,7 @@ public final class PDFLibrary: NativeLibrary {
       throw RuntimeError.argumentCount(of: "make-pdf-page", min: 0, max: 5, args: .makeList(args))
     }
     var options: [PDFPage.ImageInitializationOption : Any] = [:]
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     let img: UIImage?
     #elseif os(macOS)
     let img: NSImage?
@@ -1201,7 +1201,7 @@ public final class PDFLibrary: NativeLibrary {
     return .object(NativeImage(image))
   }
   
-  #if os(iOS) || os(watchOS) || os(tvOS)
+  #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
   
   private func pdfPageToBitmap(expr: Expr,
                                box: Expr,
@@ -2103,7 +2103,7 @@ public final class PDFLibrary: NativeLibrary {
     }
     var res = Expr.null
     for value in points.reversed() {
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       let point = value.cgPointValue
       #elseif os(macOS)
       let point = value.pointValue
@@ -2124,7 +2124,7 @@ public final class PDFLibrary: NativeLibrary {
       guard case .pair(.flonum(let x), .flonum(let y)) = point else {
         throw RuntimeError.eval(.invalidPoint, point)
       }
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       points.append(NSValue(cgPoint: CGPoint(x: x, y: y)))
       #elseif os(macOS)
       points.append(NSValue(point: CGPoint(x: x, y: y)))
@@ -2811,7 +2811,7 @@ public final class LispKitPDFPage: PDFPage {
     return copy
   }
   
-  #if os(iOS) || os(watchOS) || os(tvOS)
+  #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
   
   public override func draw(with box: PDFDisplayBox, to context: CGContext) {
     let pageBounds = self.bounds(for: box)

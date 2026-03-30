@@ -445,7 +445,7 @@ public final class DrawMapLibrary: NativeLibrary {
       }
       point = snapshot.point(for: CLLocationCoordinate2D(latitude: lat, longitude: long))
     }
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     return .pair(.flonum(point.x), .flonum(point.y))
     #elseif os(macOS)
     return .pair(.flonum(point.x), .flonum(snapshot.image.size.height - point.y))
@@ -468,7 +468,7 @@ class MapSnapshot: NativeObject {
     self.snapshot = snapshot
   }
   
-  #if os(iOS) || os(watchOS) || os(tvOS)
+  #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
   public var image: UIImage {
     return self.snapshot.image
   }

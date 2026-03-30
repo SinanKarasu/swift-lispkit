@@ -19,13 +19,14 @@
 //
 
 import Foundation
-#if os(iOS) || os(watchOS) || os(tvOS)
+import CoreGraphics
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
 #endif
 
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 public typealias NativeColor = UIColor
 #elseif os(macOS)
 public typealias NativeColor = NSColor
@@ -40,7 +41,7 @@ public struct Color: CustomExpr {
   public static let type = Type.objectType(Symbol(uninterned: "color"))
 
   /// The color space for colors represented by this struct.
-  #if os(iOS) || os(watchOS) || os(tvOS)
+  #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
   public static let colorSpaceName: CGColorSpace = CGColorSpaceCreateDeviceRGB()
   #elseif os(macOS)
   public static let colorSpaceName: NSColorSpaceName = NSColorSpaceName.deviceRGB
@@ -90,7 +91,7 @@ public struct Color: CustomExpr {
   }
   
   public init(_ nc: NativeColor) {
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     var red: CGFloat = 0.0
     var green: CGFloat = 0.0
     var blue: CGFloat = 0.0
@@ -141,6 +142,13 @@ public struct Color: CustomExpr {
       return "color \(self.red) \(self.green) \(self.blue)"
     }
   }
+
+  public var hexString: String {
+    let red = Int(round(self.red * 255.0))
+    let green = Int(round(self.green * 255.0))
+    let blue = Int(round(self.blue * 255.0))
+    return String(format: "#%02X%02X%02X", red, green, blue)
+  }
   
   /// Unpack this native object.
   public func unpack(in context: Context) -> Exprs {
@@ -152,7 +160,7 @@ public struct Color: CustomExpr {
   
   /// The corresponding `NSColor` object
   public var nsColor: NativeColor {
-    #if os(iOS) || os(watchOS) || os(tvOS)
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
     return UIColor(red: CGFloat(self.red),
                    green: CGFloat(self.green),
                    blue: CGFloat(self.blue),
@@ -175,7 +183,7 @@ public struct Color: CustomExpr {
   }
   
   /// Returns an array of `CGColor` objects for a given array of `Color` objects
-  #if os(iOS) || os(watchOS) || os(tvOS)
+  #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
   public static func cgColorArray(_ colors: [Color]) -> [CGColor] {
     var res: [CGColor] = []
     for color in colors {

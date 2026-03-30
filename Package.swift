@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:6.0
 //
 //  Package.swift
 //  LispKit
@@ -41,7 +41,8 @@ let package = Package(
   name: "LispKit",
   platforms: [
     .macOS("13.4"),
-    .iOS(.v16)
+    .iOS(.v16),
+    .visionOS(.v1)
   ],
   products: [
     .library(name: "LispKit", targets: ["LispKit"]),
@@ -80,8 +81,13 @@ let package = Package(
               .product(name: "Atomics", package: "swift-atomics")
             ],
             exclude: [
-              "Info.plist",
-              "Resources"
+              "Info.plist"
+            ],
+            resources: [
+              .copy("Resources/Assets"),
+              .copy("Resources/Examples"),
+              .copy("Resources/Libraries"),
+              .copy("Resources/Prelude.scm")
             ]),
     .target(name: "LispKitTools",
             dependencies: [

@@ -483,10 +483,15 @@ public final class LocationLibrary: NativeLibrary {
         let locale = try self.asLocale(locale)
         let geocoder = CLGeocoder()
         return try self.geocodeToLocation { handler in
+          #if os(visionOS)
+          _ = locale
+          geocoder.geocodeAddressString(str, completionHandler: handler)
+          #else
           geocoder.geocodeAddressString(str,
                                         in: nil,
                                         preferredLocale: locale,
                                         completionHandler: handler)
+          #endif
         }
     }
   }
@@ -534,10 +539,15 @@ public final class LocationLibrary: NativeLibrary {
     let locale = try self.asLocale(locale)
     let geocoder = CLGeocoder()
     return self.geocodeToPlace { handler in
+      #if os(visionOS)
+      _ = locale
+      geocoder.geocodeAddressString(str, completionHandler: handler)
+      #else
       geocoder.geocodeAddressString(str,
                                     in: nil,
                                     preferredLocale: locale,
                                     completionHandler: handler)
+      #endif
     }
   }
 }
@@ -636,6 +646,14 @@ fileprivate final class LocationManager: NSObject, ObservableObject, CLLocationM
     self.condition.unlock()
   }
   
+  #if os(visionOS)
+  func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+    self.condition.lock()
+    self.locationStatus = manager.authorizationStatus
+    self.condition.signal()
+    self.condition.unlock()
+  }
+  #else
   func locationManager(_ manager: CLLocationManager,
                        didChangeAuthorization status: CLAuthorizationStatus) {
     self.condition.lock()
@@ -643,6 +661,7 @@ fileprivate final class LocationManager: NSObject, ObservableObject, CLLocationM
     self.condition.signal()
     self.condition.unlock()
   }
+  #endif
   
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     guard let location = locations.last else {

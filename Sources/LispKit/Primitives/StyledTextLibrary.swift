@@ -7,7 +7,7 @@
 //
 
 import Foundation
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
@@ -972,7 +972,7 @@ public final class StyledTextLibrary: NativeLibrary {
       case .shadow:
         if let shadow = val as? NSShadow {
           let col: Expr
-          #if os(iOS) || os(watchOS) || os(tvOS)
+          #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
           if CFGetTypeID(shadow.shadowColor as CFTypeRef) == CGColor.typeID, // What a mess...
              let c = Color(shadow.shadowColor as! CGColor) {
             col = .pair(.object(c), .null)
@@ -1058,7 +1058,7 @@ public final class StyledTextLibrary: NativeLibrary {
             let s = NSShadow()
             s.shadowBlurRadius = CGFloat(try radius.asDouble(coerce: true))
             s.shadowColor = Color.black.nsColor
-            #if os(iOS) || os(watchOS) || os(tvOS)
+            #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
             s.shadowOffset = CGSize(width: w, height: h)
             #elseif os(macOS)
             s.shadowOffset = NSSize(width: w, height: h)
@@ -1071,7 +1071,7 @@ public final class StyledTextLibrary: NativeLibrary {
             let s = NSShadow()
             s.shadowBlurRadius = CGFloat(try radius.asDouble(coerce: true))
             s.shadowColor = try self.color(from: col).nsColor
-            #if os(iOS) || os(watchOS) || os(tvOS)
+            #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
             s.shadowOffset = CGSize(width: w, height: h)
             #elseif os(macOS)
             s.shadowOffset = NSSize(width: w, height: h)
@@ -1562,7 +1562,7 @@ public final class StyledTextLibrary: NativeLibrary {
   private func paragraphStyleEquals(style: Expr, args: Arguments) throws -> Expr {
     let pstyle = try self.paragraphStyle(from: style).value
     for arg in args {
-      #if os(iOS) || os(watchOS) || os(tvOS)
+      #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
       if !pstyle.isEqual(try self.paragraphStyle(from: arg).value) {
         return .false
       }

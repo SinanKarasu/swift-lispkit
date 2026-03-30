@@ -25,7 +25,7 @@
 ///
 public struct LibraryRegistry {
   
-  #if os(iOS) || os(watchOS) || os(tvOS)
+  #if os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
   public private(set) static var nativeLibraries: [NativeLibrary.Type] = [
     ControlFlowLibrary.self,
     CoreLibrary.self,

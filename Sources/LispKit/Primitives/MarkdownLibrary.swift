@@ -639,6 +639,10 @@ public final class MarkdownLibrary: NativeLibrary {
   }
   
   private func markdownToHtmlDoc(md: Expr, args: Arguments) throws -> Expr {
+    #if os(visionOS)
+    _ = args
+    return .makeString(HtmlGenerator.standard.generate(doc: try self.internMarkdown(block: md)))
+    #else
     var fontSize: Float = 14.0
     var fontFamily = "\"Times New Roman\",Times,serif"
     var fontColor = MarkdownKit.mdDefaultColor
@@ -730,6 +734,7 @@ public final class MarkdownLibrary: NativeLibrary {
     return .makeString(
       attribStrGen.generateHtml(
         attribStrGen.htmlGenerator.generate(doc: try self.internMarkdown(block: md))))
+    #endif
   }
   
   private func asSizeFontColor(_ expr: Expr,
