@@ -81,7 +81,8 @@ let package = Package(
               .product(name: "Atomics", package: "swift-atomics")
             ],
             exclude: [
-              "Info.plist"
+              "Info.plist",
+              "Resources/Tests"
             ],
             resources: [
               .copy("Resources/Assets"),
