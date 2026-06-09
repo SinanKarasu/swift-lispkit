@@ -1110,7 +1110,13 @@ public final class DrawingLibrary: NativeLibrary {
     let bounds = CGRect(x: x, y: y, width: w, height: h)
                    .intersection(CGRect(x: 0, y: 0, width: pixels.width, height: pixels.height))
     guard bounds.width > 0, bounds.height > 0,
-          let newImage = CIImage(image: image)?.cropped(to: bounds),
+          let newImage = CIImage(
+            image: image,
+            options: [
+              .applyOrientationProperty : true,
+              .properties: [
+                kCGImagePropertyOrientation : image.cgOrientation.rawValue
+              ]])?.cropped(to: bounds),
           let res = self.coreImageContext.createCGImage(newImage, from: newImage.extent) else {
       return .false
     }
@@ -1119,7 +1125,13 @@ public final class DrawingLibrary: NativeLibrary {
   
   private func bitmapBlur(bitmap: Expr, radius: Expr) throws -> Expr {
     let orig = try self.image(from: bitmap)
-    guard let image = CIImage(image: orig) else {
+    guard let image = CIImage(
+                image: orig,
+                options: [
+                  .applyOrientationProperty : true,
+                  .properties: [
+                    kCGImagePropertyOrientation : orig.cgOrientation.rawValue
+                  ]]) else {
       return .false
     }
     let radius = CGFloat(try radius.asDouble(coerce: true))
@@ -2605,6 +2617,30 @@ struct FontTraitModifier: OptionSet {
 }
 
 extension UIImage {
+  
+  var cgOrientation: CGImagePropertyOrientation {
+    switch self.imageOrientation {
+      case .up:
+        return .up
+      case .upMirrored:
+        return .upMirrored
+      case .down:
+        return .down
+      case .downMirrored:
+        return .downMirrored
+      case .left:
+        return .left
+      case .leftMirrored:
+        return .leftMirrored
+      case .right:
+        return .right
+      case .rightMirrored:
+        return .rightMirrored
+      @unknown default:
+        return .up
+    }
+  }
+  
   func getExifData() -> CFDictionary? {
     var exifData: CFDictionary? = nil
     if let data = self.jpegData(compressionQuality: 1.0) {

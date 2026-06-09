@@ -548,8 +548,17 @@ public final class TarArchive: NativeObject {
   /// The tar entries in this archive
   public private(set) var entries: [TarEntry]
   
-  /// Initializer
+  /// Initializer based on URL
   public init(url: URL? = nil, entries: [TarEntry]) {
+    self.url = url
+    self.entries = entries
+  }
+  
+  /// Initializer based on data
+  public init?(url: URL? = nil, data: Data) {
+    guard let entries = try? TarContainer.open(container: data) else {
+      return nil
+    }
     self.url = url
     self.entries = entries
   }
@@ -564,6 +573,10 @@ public final class TarArchive: NativeObject {
     } else {
       return super.string
     }
+  }
+  
+  public var data: Data {
+    return TarContainer.create(from: self.entries)
   }
   
   public func get(path: String) -> TarEntry? {

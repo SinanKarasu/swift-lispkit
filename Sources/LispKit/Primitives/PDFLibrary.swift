@@ -2380,6 +2380,10 @@ public struct NativePDFDocument: CustomExpr {
   
   public let document: PDFDocument
   
+  public init(document: PDFDocument) {
+    self.document = document
+  }
+  
   public var type: Type {
     return Self.type
   }
