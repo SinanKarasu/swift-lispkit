@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/objecthub/swift-clformat",
       "state" : {
-        "branch" : "main",
-        "revision" : "7103253ee2d8aaf30d589b626835f715cd22bc8d"
+        "revision" : "deab5a96b48edaac272f0f45d2dbcfe6f7604ff7",
+        "version" : "1.2.1"
       }
     },
     {
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/objecthub/swift-numberkit.git",
       "state" : {
-        "revision" : "33af3f9011e45dcd8ee696492d30dbcd5a8a67f3",
-        "version" : "2.6.0"
+        "revision" : "6182110549aa7cf614cb6fff3d6142e65be9b602",
+        "version" : "2.6.1"
       }
     },
     {

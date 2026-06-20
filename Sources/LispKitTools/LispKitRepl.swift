@@ -379,6 +379,7 @@ open class LispKitRepl {
                                                locale: Locale.current,
                                                tabsize: self.tabWidth.value,
                                                linewidth: Sysctl.terminalSize?.cols ?? 80,
+                                               displayWidth: true,
                                                arguments: [expr]) {
       self.terminal.print(str)
     } else {

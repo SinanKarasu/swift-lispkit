@@ -208,6 +208,7 @@ final class Interpreter: ContextDelegate, ObservableObject {
                                                      locale: Locale.current,
                                                      tabsize: 4,
                                                      linewidth: 80,
+                                                     displayWidth: true,
                                                      arguments: [x])) ?? x.description
           } else {
             message += "\n"
@@ -216,6 +217,7 @@ final class Interpreter: ContextDelegate, ObservableObject {
                                                       locale: Locale.current,
                                                       tabsize: 4,
                                                       linewidth: 80,
+                                                      displayWidth: true,
                                                       arguments: [x])) ?? x.description
           }
           next = rest
@@ -228,6 +230,7 @@ final class Interpreter: ContextDelegate, ObservableObject {
                                                  locale: Locale.current,
                                                  tabsize: 4,
                                                  linewidth: 80,
+                                                 displayWidth: true,
                                                  arguments: [res])) ?? res.description
         context.update(withReplResult: res)
         return ConsoleOutput(kind: .result, text: str)

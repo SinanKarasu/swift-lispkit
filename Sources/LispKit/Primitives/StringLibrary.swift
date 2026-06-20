@@ -47,6 +47,7 @@ public final class StringLibrary: NativeLibrary {
     self.define(Procedure("string-ref", stringRef))
     self.define(Procedure("string-set!", stringSet))
     self.define(Procedure("string-length", stringLength))
+    self.define(Procedure("string-display-width", stringDisplayWidth))
     self.define(Procedure("string-append", stringAppend))
     self.define(Procedure("string-concatenate", stringConcatenate))
     self.define(Procedure("string=?", stringEquals))
@@ -161,8 +162,16 @@ public final class StringLibrary: NativeLibrary {
     return .string(NSMutableString(string: String(utf16CodeUnits: uniChars, count: uniChars.count)))
   }
   
-  func stringLength(_ expr: Expr) throws -> Expr {
-    return .fixnum(Int64(try expr.asString().utf16.count))
+  func stringLength(_ expr: Expr, chars: Expr?) throws -> Expr {
+    if chars?.isTrue ?? false {
+      return .fixnum(Int64(try expr.asString().count))
+    } else {
+      return .fixnum(Int64(try expr.asString().utf16.count))
+    }
+  }
+  
+  func stringDisplayWidth(_ expr: Expr, chars: Expr?) throws -> Expr {
+    return .fixnum(Int64(try expr.asString().terminalDisplayWidth))
   }
   
   func stringListLength(_ strings: Expr) throws -> Expr {

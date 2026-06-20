@@ -37,6 +37,7 @@ open class Formatter {
     formatConfig.locale = Locale.current
     formatConfig.tabWidth = 8
     formatConfig.lineWidth = 80
+    formatConfig.displayWidth = true
     let sexprDirSpec =  SExprDirectiveSpecifier(context: context)
     var clFormatConfig = CLFormatConfig.standard
     clFormatConfig.setArgumentFactory(makeArguments: FormatArguments.init)
@@ -80,16 +81,20 @@ open class Formatter {
                    locale: Locale? = nil,
                    tabsize: Int? = nil,
                    linewidth: Int? = nil,
+                   displayWidth: Bool? = nil,
                    arguments: [Expr]) throws -> String {
     let fconfig = FormatConfig(outerConfig: config ?? self.defaultFormatConfig())
     if let locale = locale {
       fconfig.locale = locale
     }
-    if let tabsize = tabsize {
+    if let tabsize {
       fconfig.tabWidth = tabsize
     }
-    if let linewidth = linewidth {
+    if let linewidth {
       fconfig.lineWidth = linewidth
+    }
+    if let displayWidth {
+      fconfig.displayWidth = displayWidth
     }
     var clFormatConfig = self.clFormatConfig
     clFormatConfig.environment["formatConfig"] = fconfig
@@ -98,6 +103,7 @@ open class Formatter {
                         locale: fconfig.getLocale(),
                         tabsize: fconfig.getTabWidth(),
                         linewidth: fconfig.getLineWidth(),
+                        displayWidth: fconfig.getDisplayWidth(),
                         arguments: arguments)
   }
   
@@ -133,6 +139,9 @@ public final class FormatConfig: NativeObject {
   /// The width of a line
   public var lineWidth: Int?
   
+  /// Should the width as displayed on a terminal be used to pad and align values?
+  public var displayWidth: Bool?
+  
   /// Control dictionary for ~S directives
   public private(set) var controlDict: [Symbol : FormatControl]
   
@@ -143,6 +152,7 @@ public final class FormatConfig: NativeObject {
     self.locale = nil
     self.tabWidth = nil
     self.lineWidth = nil
+    self.displayWidth = nil
     self.controlDict = [:]
     self.outerConfig = outerConfig
   }
@@ -151,6 +161,7 @@ public final class FormatConfig: NativeObject {
     self.locale = copy.locale
     self.tabWidth = copy.tabWidth
     self.lineWidth = copy.lineWidth
+    self.displayWidth = copy.displayWidth
     self.controlDict = copy.controlDict
     self.outerConfig = outer ?? copy.outerConfig
   }
@@ -159,6 +170,7 @@ public final class FormatConfig: NativeObject {
     self.locale = collapse.getLocale()
     self.tabWidth = collapse.getTabWidth()
     self.lineWidth = collapse.getLineWidth()
+    self.displayWidth = collapse.getDisplayWidth()
     self.controlDict = collapse.controlDict
     self.outerConfig = outer
     var parent = collapse.outerConfig
@@ -180,6 +192,7 @@ public final class FormatConfig: NativeObject {
     guard self.locale != nil ||
           self.tabWidth != nil ||
           self.lineWidth != nil ||
+          self.displayWidth != nil ||
           self.controlDict.count > 0 else {
       return res + ">"
     }
@@ -194,6 +207,10 @@ public final class FormatConfig: NativeObject {
     }
     if let lineWidth = self.lineWidth {
       res += "\(sep)line-width = \(lineWidth)"
+      sep = "; "
+    }
+    if let displayWidth = self.displayWidth {
+      res += "\(sep)align = \(displayWidth ? "display" : "length")"
       sep = "; "
     }
     sep = "\(sep)controls = "
@@ -219,6 +236,7 @@ public final class FormatConfig: NativeObject {
             self.locale == nil ? .false : .makeString(self.locale!.identifier),
             self.tabWidth == nil ? .false : .makeNumber(self.tabWidth!),
             self.lineWidth == nil ? .false : .makeNumber(self.lineWidth!),
+            self.displayWidth == nil ? .null : .makeBoolean(self.displayWidth!),
             .vector(Collection(kind: .immutableVector, exprs: exprs))]
   }
   
@@ -232,6 +250,10 @@ public final class FormatConfig: NativeObject {
   
   public func getLineWidth() -> Int {
     return self.lineWidth ?? self.outerConfig?.getLineWidth() ?? 80
+  }
+  
+  public func getDisplayWidth() -> Bool {
+    return self.displayWidth ?? self.outerConfig?.getDisplayWidth() ?? false
   }
   
   public func format(_ type: Symbol, with control: CLControl, in env: FormatConfig?) {
@@ -428,6 +450,7 @@ public class SExprDirectiveSpecifier: DirectiveSpecifier {
             let args = context.config.makeArguments(locale: arguments.locale,
                                                     tabsize: arguments.tabsize,
                                                     linewidth: arguments.linewidth,
+                                                    displayWidth: arguments.displayWidth,
                                                     args: unpacked)
             var config = context.config
             if let env = env {
@@ -690,6 +713,7 @@ public enum LispKitDirectiveSpecifier: DirectiveSpecifier {
         let args = context.config.makeArguments(locale: arguments.locale,
                                                 tabsize: arguments.tabsize,
                                                 linewidth: arguments.linewidth,
+                                                displayWidth: arguments.displayWidth,
                                                 args: unpacked)
         let str = try control.format(with: args, in: context).string
         return .append(StandardDirectiveSpecifier.pad(string: str,

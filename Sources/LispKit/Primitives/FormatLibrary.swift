@@ -46,6 +46,8 @@ public final class FormatLibrary: NativeLibrary {
     self.define(Procedure("format-config-tabwidth-set!", self.formatConfigTabWidthSet))
     self.define(Procedure("format-config-linewidth", self.formatConfigLineWidth))
     self.define(Procedure("format-config-linewidth-set!", self.formatConfigLineWidthSet))
+    self.define(Procedure("format-config-align-display", self.formatConfigDisplayWidth))
+    self.define(Procedure("format-config-align-display-set!", self.formatConfigDisplayWidthSet))
     self.define(Procedure("format-config-control-set!", self.formatConfigControlSet))
     self.define(Procedure("format-config-control-remove!", self.formatConfigControlRemove))
     self.define(Procedure("format-config-controls", self.formatConfigControls))
@@ -120,6 +122,13 @@ public final class FormatLibrary: NativeLibrary {
       fconfig.lineWidth = len
       arg = iterator.next()
     }
+    switch arg {
+      case .some(.true), .some(.false):
+        fconfig.displayWidth = arg!.isTrue
+        arg = iterator.next()
+      default:
+        break
+    }
     guard case .some(.string(let control)) = arg else {
       throw RuntimeError(SourcePosition.unknown,
                          ErrorDescriptor.eval(.controlStringMissing),
@@ -135,6 +144,7 @@ public final class FormatLibrary: NativeLibrary {
                            locale: fconfig.getLocale(),
                            tabsize: fconfig.getTabWidth(),
                            linewidth: fconfig.getLineWidth(),
+                           displayWidth: fconfig.getDisplayWidth(),
                            arguments: arguments)
     if let output = output {
       guard output.writeString(res) else {
@@ -178,6 +188,13 @@ public final class FormatLibrary: NativeLibrary {
       fconf.lineWidth = try arg!.asInt(above: 1, below: Int.max - 100)
       arg = iterator.next()
     }
+    switch arg {
+      case .some(.true), .some(.false):
+        fconf.displayWidth = arg!.isTrue
+        arg = iterator.next()
+      default:
+        break
+    }
     while case .some(.pair(let typeExpr, .pair(let controlExpr, let cdr))) = arg {
       let typeTag: Symbol
       // Allow record types as type tags
@@ -215,11 +232,11 @@ public final class FormatLibrary: NativeLibrary {
   
   private func makeFormatConfig(outer: Expr, args: Arguments) throws -> Expr {
     let fconf = FormatConfig(outerConfig: outer.isTrue ? try self.formatConfig(from: outer) : nil)
-    guard let (loc, twidth, lwidth) =
-            args.optional(.false, .false, .false) else {
+    guard let (loc, twidth, lwidth, dwidth) =
+            args.optional(.false, .false, .false, .null) else {
       throw RuntimeError.argumentCount(of: "make-format-config",
                                        min: 1,
-                                       max: 4,
+                                       max: 5,
                                        args: .pair(outer, .makeList(args)))
     }
     if loc.isTrue {
@@ -229,7 +246,10 @@ public final class FormatLibrary: NativeLibrary {
       fconf.tabWidth = try twidth.asInt(above: 1, below: 1000)
     }
     if lwidth.isTrue {
-      fconf.lineWidth = try twidth.asInt(above: 1, below: Int.max - 100)
+      fconf.lineWidth = try lwidth.asInt(above: 1, below: Int.max - 100)
+    }
+    if !dwidth.isNull {
+      fconf.displayWidth = dwidth.isTrue
     }
     return .object(fconf)
   }
@@ -289,6 +309,21 @@ public final class FormatLibrary: NativeLibrary {
       fconf.lineWidth = nil
     } else {
       fconf.lineWidth = try lineWidth.asInt(above: 1, below: 1000)
+    }
+    return .void
+  }
+  
+  private func formatConfigDisplayWidth(config: Expr?) throws -> Expr {
+    return .makeBoolean(try self.formatConfig(from: config).getDisplayWidth())
+  }
+  
+  private func formatConfigDisplayWidthSet(fst: Expr, snd: Expr?) throws -> Expr {
+    let fconf = try self.formatConfig(from: snd == nil ? nil : fst)
+    let displayWidth = snd == nil ? fst : snd!
+    if displayWidth.isNull {
+      fconf.displayWidth = nil
+    } else {
+      fconf.displayWidth = displayWidth.isTrue
     }
     return .void
   }
