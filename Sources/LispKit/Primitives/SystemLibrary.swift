@@ -26,6 +26,7 @@ import NanoHTTP
 import UIKit
 #elseif os(macOS)
 import Cocoa
+import IOKit.ps
 #endif
 
 ///
@@ -120,6 +121,8 @@ public final class SystemLibrary: NativeLibrary {
     self.define(Procedure("machine-model", self.machineModel))
     self.define(Procedure("physical-memory", self.physicalMemory))
     self.define(Procedure("memory-footprint", self.memoryFootprint))
+    self.define(Procedure("device-battery-level", self.deviceBatteryLevel))
+    self.define(Procedure("device-battery-state", self.deviceBatteryState))
     self.define(Procedure("system-uptime", self.systemUptime))
     self.define(Procedure("available-network-interfaces", self.availableNetworkInterfaces))
     self.define(Procedure("os-type", self.osType))
@@ -926,6 +929,100 @@ public final class SystemLibrary: NativeLibrary {
       return .false
     }
     return .makeNumber(UInt64(info.phys_footprint)) // returns number of bytes
+  }
+  
+  private func deviceBatteryLevel() -> Expr {
+    #if os(macOS)
+      guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue() else {
+        return .false
+      }
+      guard let sourcesList = IOPSCopyPowerSourcesList(snapshot)?
+                                .takeRetainedValue() as? [CFTypeRef] else {
+        return .false
+      }
+      for source in sourcesList {
+        guard let description = IOPSGetPowerSourceDescription(snapshot, source)?
+                                  .takeUnretainedValue() as? [String: Any] else {
+          continue
+        }
+        if description[kIOPSTypeKey as String] as? String == kIOPSInternalBatteryType {
+           let currentCapacity = description[kIOPSCurrentCapacityKey as String] as? Int ?? 0
+           let maxCapacity = description[kIOPSMaxCapacityKey as String] as? Int ?? 100
+          return .makeNumber(Double(currentCapacity) / Double(maxCapacity))
+        }
+      }
+      return .false
+    #elseif os(iOS)
+      let device = UIDevice.current
+      let batteryLevel: Float
+      if !device.isBatteryMonitoringEnabled {
+        device.isBatteryMonitoringEnabled = true
+        defer {
+          device.isBatteryMonitoringEnabled = false
+        }
+        batteryLevel = UIDevice.current.batteryLevel 
+      } else {
+        batteryLevel = UIDevice.current.batteryLevel
+      }
+      if batteryLevel >= 0.0 {
+        return .makeNumber(Double(batteryLevel))
+      } else {
+        return .false
+      }
+    #elseif os(Linux)
+      return .false
+    #endif
+  }
+  
+  private func deviceBatteryState() -> Expr {
+    #if os(macOS)
+      guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+            let sourcesList = IOPSCopyPowerSourcesList(snapshot)?
+                                .takeRetainedValue() as? [CFTypeRef] else {
+        return .false
+      }
+      for source in sourcesList {
+        guard let description = IOPSGetPowerSourceDescription(snapshot, source)?
+                                  .takeUnretainedValue() as? [String: Any],
+              description[kIOPSTypeKey as String] as? String == kIOPSInternalBatteryType else {
+          continue
+        }
+        let powerState = description[kIOPSPowerSourceStateKey as String] as? String ?? ""
+        if description[kIOPSIsChargingKey as String] as? Bool ?? false {
+          return .symbol(context.symbols.intern("charging"))
+        } else if description[kIOPSIsChargedKey as String] as? Bool ?? false {
+          return .symbol(context.symbols.intern("full"))
+        } else if powerState == kIOPSACPowerValue {
+          return .symbol(context.symbols.intern("plugged-in-no-charging"))
+        } else if powerState == kIOPSBatteryPowerValue {
+          return .symbol(context.symbols.intern("discharging"))
+        } else {
+          return .symbol(context.symbols.intern("unknown"))
+        }
+      }
+      return .false
+    #elseif os(iOS)
+      let device = UIDevice.current
+      let originalState = device.isBatteryMonitoringEnabled
+      device.isBatteryMonitoringEnabled = true
+      defer {
+        device.isBatteryMonitoringEnabled = originalState
+      }
+      switch device.batteryState {
+        case .charging:
+          return .symbol(context.symbols.intern("charging"))
+        case .full:
+          return .symbol(context.symbols.intern("full"))
+        case .unplugged:
+          return .symbol(context.symbols.intern("discharging"))
+        case .unknown:
+          return .symbol(context.symbols.intern("unknown"))
+        @unknown default:
+          return .false
+      }
+    #elseif os(Linux)
+      return .false
+    #endif
   }
   
   private func systemUptime() -> Expr {

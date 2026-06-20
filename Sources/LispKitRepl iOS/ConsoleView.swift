@@ -156,13 +156,13 @@ struct ConsoleView: View {
                 proxy.scrollTo(self.content[self.content.endIndex - 1].id, anchor: .bottomLeading)
               }
             }
-          }.onChange(of: self.content.count) { _ in
+          }.onChange(of: self.content.count) {
             if self.content.count > 0 {
               withAnimation {
                 proxy.scrollTo(self.content[self.content.endIndex - 1].id, anchor: .bottomLeading)
               }
             }
-          }.onChange(of: self.input.count) { _ in
+          }.onChange(of: self.input.count) {
             if self.content.count > 0 {
               proxy.scrollTo(self.content[self.content.endIndex - 1].id, anchor: .bottomLeading)
             }
