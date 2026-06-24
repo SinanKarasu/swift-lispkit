@@ -152,7 +152,9 @@ public final class MarkdownLibrary: NativeLibrary {
     self.define(Procedure("markdown?", isMarkdown))
     self.define(Procedure("markdown=?", markdownEquals))
     self.define(Procedure("markdown->string", markdownToString))
+    #if os(macOS)
     self.define(Procedure("markdown->styled-text", markdownToStyledText))
+    #endif
     self.define(Procedure("markdown->html-doc", markdownToHtmlDoc))
     self.define(Procedure("markdown->html", markdownToHtml))
     self.define(Procedure("markdown->sxml", markdownToSxml))
@@ -1090,6 +1092,7 @@ public final class MarkdownLibrary: NativeLibrary {
     }
   }
   
+  #if os(macOS)
   private func attributedStringGenerator(from args: Arguments) throws -> AttributedStringGenerator {
     var fontSize: Float = 14.0
     var fontFamily = "\"Times New Roman\",Times,serif"
@@ -1229,7 +1232,8 @@ public final class MarkdownLibrary: NativeLibrary {
                                      h3Color: h3Color,
                                      h4Color: h4Color)
   }
-  
+  #endif // os(macOS)
+
   private func markdownToHtmlDoc(md: Expr, args: Arguments) throws -> Expr {
     #if os(visionOS)
     _ = args
@@ -1242,6 +1246,7 @@ public final class MarkdownLibrary: NativeLibrary {
     #endif
   }
   
+  #if os(macOS)
   private func markdownToStyledText(md: Expr, args: Arguments) throws -> Expr {
     let attribStrGen = try self.attributedStringGenerator(from: args)
     if let astr = attribStrGen.generate(doc: try self.internMarkdown(block: md)) {
@@ -1250,7 +1255,8 @@ public final class MarkdownLibrary: NativeLibrary {
       return .false
     }
   }
-  
+  #endif // os(macOS)
+
   private func asSizeFontColor(_ expr: Expr,
                                defaultSize: Float,
                                defaultFont: String,
