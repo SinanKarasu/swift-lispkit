@@ -1324,7 +1324,7 @@ public final class MarkdownLibrary: NativeLibrary {
   
   private func blocksToSxml(_ expr: Expr, tight: Expr?) throws -> Expr {
     let gen = SXMLGenerator(context: self.context)
-    let tight = tight?.isTrue ?? false
+    let tight = ListDensity(tight: tight?.isTrue ?? false)
     switch expr {
       case .pair(_ , _):
         return gen.generate(blocks: try self.internMarkdown(blocks: expr), tight: tight)
@@ -1918,7 +1918,7 @@ open class SXMLGenerator {
     return .pair(self.symbol("@"), res)
   }
   
-  open func generate(blocks: Blocks, tight: Bool = false) -> Expr {
+  open func generate(blocks: Blocks, tight: ListDensity = .initial) -> Expr {
     var res = Expr.null
     for block in blocks.reversed() {
       res = .pair(self.generate(block: block, tight: tight), res)
@@ -1926,7 +1926,7 @@ open class SXMLGenerator {
     return res
   }
 
-  open func generate(block: Block, tight: Bool = false) -> Expr {
+  open func generate(block: Block, tight: ListDensity = .initial) -> Expr {
     switch block {
       case .document(let blocks):
         return self.generate(blocks: blocks)
@@ -1941,7 +1941,7 @@ open class SXMLGenerator {
           return .pair(self.symbol("ul"), self.generate(blocks: blocks, tight: tight))
         }
       case .listItem(_, _, let blocks):
-        if tight, let text = blocks.text {
+        if tight.isTight, let text = blocks.text {
           return .pair(self.symbol("li"), self.generate(text: text))
         } else {
           return .pair(self.symbol("li"), self.generate(blocks: blocks))
@@ -2050,7 +2050,8 @@ open class SXMLGenerator {
         return .pair(self.symbol("dl"), ds)
       case .custom(let customBlock):
         return .pair(self.symbol("@raw"),
-                     .pair(.makeString(customBlock.generateHtml(via: HtmlGenerator.standard, tight: tight)),
+                     .pair(.makeString(customBlock.generateHtml(via: HtmlGenerator.standard,
+                                                                tight: tight.isTight)),
                            .null))
     }
   }
