@@ -50,11 +50,11 @@ let package = Package(
     .executable(name: "LispKitRepl", targets: ["LispKitRepl"])
   ],
   dependencies: [
-    .package(url: "https://github.com/objecthub/swift-numberkit.git", from: "2.6.0"),
+    .package(url: "https://github.com/objecthub/swift-numberkit.git", from: "2.6.1"),
     .package(url: "https://github.com/objecthub/swift-markdownkit.git", from: "1.4.1"),
     .package(url: "https://github.com/objecthub/swift-commandlinekit.git", from: "1.1.1"),
     .package(url: "https://github.com/objecthub/swift-sqliteexpress.git", from: "1.0.3"),
-    .package(url: "https://github.com/objecthub/swift-clformat.git", branch: "main"),
+    .package(url: "https://github.com/objecthub/swift-clformat.git", from: "1.2.1"),
     .package(url: "https://github.com/objecthub/swift-dynamicjson.git", branch: "main"),
     .package(url: "https://github.com/objecthub/swift-nanohttp.git", from: "1.0.1"),
     .package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.20"),
