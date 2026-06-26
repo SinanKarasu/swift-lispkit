@@ -1933,12 +1933,13 @@ open class SXMLGenerator {
       case .blockquote(let blocks):
         return .pair(self.symbol("blockquote"), self.generate(blocks: blocks))
       case .list(let start, let tight, let blocks):
+        let density = ListDensity(tight: tight)
         if let startNumber = start {
           return .pair(self.symbol("ol"),
                        .pair(self.attribs(["start" : .makeNumber(startNumber)]),
-                             self.generate(blocks: blocks, tight: tight)))
+                             self.generate(blocks: blocks, tight: density)))
         } else {
-          return .pair(self.symbol("ul"), self.generate(blocks: blocks, tight: tight))
+          return .pair(self.symbol("ul"), self.generate(blocks: blocks, tight: density))
         }
       case .listItem(_, _, let blocks):
         if tight.isTight, let text = blocks.text {
